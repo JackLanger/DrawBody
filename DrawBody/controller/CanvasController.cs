@@ -22,6 +22,33 @@ public class CanvasController : BaseController
     /// </summary>
     private static Vector3D _origin = new Vector3D(WindowUtils.GetCenter().Item1, WindowUtils.GetCenter().Item2, 0);
 
+    private int _TorusDetail;
+
+    public int TorusDetail
+    {
+        get { return _TorusDetail; }
+        set
+        {
+            _TorusDetail = value;
+            OnPropertyChanged();
+            updateCanvas();
+        }
+    }
+
+    private int _RingDetail;
+
+    public int RingDetail
+    {
+        get { return _RingDetail; }
+        set
+        {
+            _RingDetail = value;
+            OnPropertyChanged();
+            updateCanvas();
+        }
+    }
+
+
     /// <summary>
     /// The canvas that will be used to display the bodys.
     /// </summary>
@@ -34,6 +61,16 @@ public class CanvasController : BaseController
             _canvas = value;
             OnPropertyChanged();
         }
+    }
+
+    private void updateCanvas()
+    {
+        if (Canvas is null)
+            return;
+
+        Canvas.Children.Clear();
+        DrawGrid();
+        DrawTorus();
     }
 
     /// <summary>
@@ -52,7 +89,17 @@ public class CanvasController : BaseController
     private void DrawTorus()
     {
         Torus torus = new Torus();
-        DrawBody(torus.CalculateTorus());
+        DrawBody(torus.CalculateTorus(200, 50, TorusDetail, RingDetail));
+    }
+
+    /// <summary>
+    /// if the face is covered it wont be drawn.
+    /// </summary>
+    /// <param name="normal">the crossporduct of the faces directional vertices</param>
+    /// <returns>true if can draw</returns>
+    private bool CanDrawFace(Vector3D normal)
+    {
+        return true;
     }
 
     private void DrawBody(List<List<Vector3D>> bodyValues)
@@ -63,7 +110,7 @@ public class CanvasController : BaseController
             var next = bodyValues[(i + 1) % bodyValues.Count];
             for (var k = 0; k < current.Count; k++)
             {
-                int indexPlus = (k + 1) % current.Count;
+                int indexPlus = Math.Abs((k + 1) % current.Count);
                 List<Vector3D> vector3Ds = new List<Vector3D>() { current[k], next[k], next[indexPlus],
                                                                                                      current[k], current[indexPlus], next[indexPlus] };
 
