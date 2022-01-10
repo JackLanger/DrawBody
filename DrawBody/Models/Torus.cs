@@ -68,17 +68,17 @@ public class Torus
 
         for (int i = 0; i < detail; i++)
         {
-            var angle = step * i;
-            Vector3D result = new Vector3D(radius * Math.Cos(angle), Math.Sin(angle) * radius, 0);
-            result += origin;
-            circle[i] = result;
+            var angle = step * i;           // step along the circle
+            Vector3D ringLocation = new Vector3D(Math.Cos(angle), Math.Sin(angle), 0) * radius;
+            ringLocation += origin;
+            circle[i] = ringLocation;
 
 
             List<Vector3D> ring = new();
             for (int j = 0; j < ringDetail; j++)
             {
                 double subangle = AngleUtils.DegreeToRadian(j * ringAngleStep);
-                ring.Add(CalculateVector(result, subangle, ringRadius));
+                ring.Add(CalculateVector(ringLocation, subangle, ringRadius));
             }
             torus.Add(ring);
         }
@@ -97,16 +97,15 @@ public class Torus
     {
         Vector3D vector = center;
         vector.Normalize();
-        vector.Z = vector.Z == 0 ? 1 : vector.Z;
 
         double cos = Math.Round(Math.Cos(angle), 3);
         double sin = Math.Round(Math.Sin(angle), 3);
 
         vector.X *= cos * radius;
         vector.Y *= cos * radius;
-        vector.Z *= sin * radius;
+        vector.Z = sin * radius;
 
-        return vector + center;
+        return center - vector;
     }
 
 }
