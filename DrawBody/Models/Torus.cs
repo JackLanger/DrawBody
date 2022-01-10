@@ -61,12 +61,12 @@ public class Torus
     /// <returns>a collection of vertices</returns>
     public List<List<Vector3D>> CalculateTorus(double radius, double ringRadius, int detail, int ringDetail)
     {
-        Vector3D[] circle = new Vector3D[detail + 1];
+        Vector3D[] circle = new Vector3D[detail];
         var step = Helpers.AngleUtils.DegreeToRadian(360.0 / detail);     // convert from radials to degree
         double ringAngleStep = 360.0 / ringDetail;       // step size for the rings
         List<List<Vector3D>> torus = new();
 
-        for (int i = 0; i <= detail; i++)
+        for (int i = 0; i < detail; i++)
         {
             var angle = step * i;
             Vector3D result = new Vector3D(radius * Math.Cos(angle), Math.Sin(angle) * radius, 0);

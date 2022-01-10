@@ -22,7 +22,7 @@ public class CanvasController : BaseController
     /// </summary>
     private static Vector3D _origin = new Vector3D(WindowUtils.GetCenter().Item1, WindowUtils.GetCenter().Item2, 0);
 
-    private int _TorusDetail;
+    private int _TorusDetail = 50;
 
     public int TorusDetail
     {
@@ -31,11 +31,11 @@ public class CanvasController : BaseController
         {
             _TorusDetail = value;
             OnPropertyChanged();
-            updateCanvas();
+            UpdateCanvas();
         }
     }
 
-    private int _RingDetail;
+    private int _RingDetail = 25;
 
     public int RingDetail
     {
@@ -44,7 +44,7 @@ public class CanvasController : BaseController
         {
             _RingDetail = value;
             OnPropertyChanged();
-            updateCanvas();
+            UpdateCanvas();
         }
     }
 
@@ -63,7 +63,7 @@ public class CanvasController : BaseController
         }
     }
 
-    private void updateCanvas()
+    private void UpdateCanvas()
     {
         if (Canvas is null)
             return;
@@ -81,6 +81,7 @@ public class CanvasController : BaseController
     {
         _canvas = canvas;
         DrawGrid();
+        UpdateCanvas();
     }
 
     /// <summary>
@@ -112,7 +113,7 @@ public class CanvasController : BaseController
             {
                 int indexPlus = Math.Abs((k + 1) % current.Count);
                 List<Vector3D> vector3Ds = new List<Vector3D>() { current[k], next[k], next[indexPlus],
-                                                                                                     current[k], current[indexPlus], next[indexPlus] };
+                                                                  current[k], current[indexPlus], next[indexPlus] };
 
                 DrawPolygon(CorrectValuesFor2D(vector3Ds));
             }
