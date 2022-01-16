@@ -1,4 +1,4 @@
-﻿using DrawBody.execution;
+using DrawBody.execution;
 using DrawBody.Helpers;
 using DrawBody.Models;
 using System;
@@ -90,7 +90,7 @@ public class CanvasController : BaseController
     private void DrawTorus()
     {
         Torus torus = new Torus();
-        DrawBody(torus.CalculateTorus(200, 50, TorusDetail, RingDetail));
+        DrawBody(torus.CalculateTorus(200, 50, TorusDetail, RingDetail), RingDetail);
     }
 
     /// <summary>
@@ -103,6 +103,19 @@ public class CanvasController : BaseController
         return true;
     }
 
+    private void DrawBody(List<Vector3D> bodyVals, int ringDetail)
+    {
+        for (int i = 0; i < bodyVals.Count; i++)
+        {
+            var second = Math.Abs((i + RingDetail) % bodyVals.Count); // the next ring
+            var secondPlus = Math.Abs((second + 1) % bodyVals.Count);
+            var vectors = new List<Vector3D>() { bodyVals[i], bodyVals[second], bodyVals[secondPlus],
+                bodyVals[secondPlus], bodyVals[i], bodyVals[Math.Abs(i + 1) % bodyVals.Count] };
+
+            DrawPolygon(CorrectValuesFor2D(vectors));
+        }
+    }
+
     private void DrawBody(List<List<Vector3D>> bodyValues)
     {
         for (int i = 0; i < bodyValues.Count; i++)
@@ -112,8 +125,8 @@ public class CanvasController : BaseController
             for (var k = 0; k < current.Count; k++)
             {
                 int indexPlus = Math.Abs((k + 1) % current.Count);
-                List<Vector3D> vector3Ds = new List<Vector3D>() { current[k], next[k], next[indexPlus],
-                                                                  current[k], current[indexPlus], next[indexPlus] };
+                List<Vector3D> vector3Ds = new List<Vector3D>() { current[k], next[k], next[indexPlus],// 0 1 2
+                                                                   next[indexPlus], current[k], current[indexPlus] }; // 2 0 3
 
                 DrawPolygon(CorrectValuesFor2D(vector3Ds));
             }
@@ -324,6 +337,7 @@ public class CanvasController : BaseController
             // as opposed to the system in which we calculate our values
             // therefore we need to invert the y values and subtract them
             // from the y axis in order to draw it correctly
+
 
             result[index++] = new Point(x, y);
         }
