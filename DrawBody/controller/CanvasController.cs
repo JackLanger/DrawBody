@@ -105,33 +105,30 @@ public class CanvasController : BaseController
 
     private void DrawBody(List<Vector3D> bodyVals, int ringDetail)
     {
+        var mod = bodyVals.Count;
+
         for (int i = 0; i < bodyVals.Count; i++)
         {
-            var second = Math.Abs((i + RingDetail) % bodyVals.Count); // the next ring
-            var secondPlus = Math.Abs((second + 1) % bodyVals.Count);
-            var vectors = new List<Vector3D>() { bodyVals[i], bodyVals[second], bodyVals[secondPlus],
-                bodyVals[secondPlus], bodyVals[i], bodyVals[Math.Abs(i + 1) % bodyVals.Count] };
+            //var first = bodyVals[i];
+            //var second = bodyVals[(i + ringDetail) % mod];
+            //var third = bodyVals[(i + 1 + ringDetail) % mod];
+            //var fourth = bodyVals[(i + 1) % mod];
+
+            var first = bodyVals[i];
+            var second = bodyVals[(i + ringDetail) % mod];
+            var third = bodyVals[(i + 1 + ringDetail) % mod];
+            var fourth = bodyVals[(i + 1) % mod];
+
+
+            //  1 2 3 3 1 4
+
+            var vectors = new List<Vector3D>() { first, second, third, third, first, fourth };
 
             DrawPolygon(CorrectValuesFor2D(vectors));
         }
     }
 
-    private void DrawBody(List<List<Vector3D>> bodyValues)
-    {
-        for (int i = 0; i < bodyValues.Count; i++)
-        {
-            var current = bodyValues[i];
-            var next = bodyValues[(i + 1) % bodyValues.Count];
-            for (var k = 0; k < current.Count; k++)
-            {
-                int indexPlus = Math.Abs((k + 1) % current.Count);
-                List<Vector3D> vector3Ds = new List<Vector3D>() { current[k], next[k], next[indexPlus],// 0 1 2
-                                                                   next[indexPlus], current[k], current[indexPlus] }; // 2 0 3
 
-                DrawPolygon(CorrectValuesFor2D(vector3Ds));
-            }
-        }
-    }
     /// <summary>
     /// Draws a single polygon
     /// </summary>
@@ -149,27 +146,6 @@ public class CanvasController : BaseController
         Canvas.Children.Add(polygon);
     }
 
-    /// <summary>
-    /// Draws a torus body on the canvas
-    /// </summary>
-    public void DrawTorusRings()
-    {
-        Torus torus = new();
-
-        List<List<Vector3D>> rings = torus.CalculateTorus();
-
-        foreach (var ring in rings)
-        {
-            if (ring == rings[0])       // dont draw the first ring
-                continue;
-
-            Polyline poly = new();
-            poly.Stroke = Brushes.Black;
-            poly.StrokeThickness = 0.36;
-            poly.Points = new PointCollection(CorrectValuesFor2D(ring));
-            Canvas.Children.Add(poly);
-        }
-    }
     /// <summary>
     /// Draws the origin on the canvas.
     /// </summary>
