@@ -109,22 +109,20 @@ public class CanvasController : BaseController
 
         for (int i = 0; i < bodyVals.Count; i++)
         {
-            //var first = bodyVals[i];
-            //var second = bodyVals[(i + ringDetail) % mod];
-            //var third = bodyVals[(i + 1 + ringDetail) % mod];
-            //var fourth = bodyVals[(i + 1) % mod];
+            var ringNum = ringDetail * (i * (bodyVals.Count / ringDetail));
 
             var first = bodyVals[i];
             var second = bodyVals[(i + ringDetail) % mod];
-            var third = bodyVals[(i + 1 + ringDetail) % mod];
-            var fourth = bodyVals[(i + 1) % mod];
-
+            var third = bodyVals[(i + ringNum + 1) % mod];
+            //var fourth = bodyVals[(i + 1) % ringDetail];
 
             //  1 2 3 3 1 4
 
-            var vectors = new List<Vector3D>() { first, second, third, third, first, fourth };
+            var polyOne = new List<Vector3D>() { first, second, third };
+            //var polyTwo = new List<Vector3D>() { third, first, fourth };
 
-            DrawPolygon(CorrectValuesFor2D(vectors));
+            DrawPolygon(CorrectValuesFor2D(polyOne));
+            //DrawPolygon(CorrectValuesFor2D(polyTwo));
         }
     }
 
