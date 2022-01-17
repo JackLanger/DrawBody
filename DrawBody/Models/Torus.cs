@@ -1,4 +1,4 @@
-﻿using DrawBody.Helpers;
+using DrawBody.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Windows.Media.Media3D;
@@ -38,7 +38,7 @@ public class Torus
     /// Calculate the vertices of the Torus.
     /// </summary>
     /// /// <returns>a collection of vertices</returns>
-    public List<List<Vector3D>> CalculateTorus()
+    public List<Vector3D> CalculateTorus()
       => CalculateTorus(200, 50, 100, 36);
 
 
@@ -48,41 +48,40 @@ public class Torus
     /// <param name="radius">the radius of the torus</param>
     /// <param name="ringRadius">the ring radius of the torus</param>
     /// <returns>a collection of vertices</returns>
-    public List<List<Vector3D>> CalculateTorus(double radius, double ringRadius)
+    public List<Vector3D> CalculateTorus(double radius, double ringRadius)
       => CalculateTorus(radius, ringRadius, 100, 36);
 
 
-    /// <summary>
-    /// Calculate the vertices of the Torus.
-    /// </summary>
-    /// <param name="radius">the radius of the torus</param>
-    /// <param name="ringRadius">the radius of the rings of the torus</param>
-    /// <param name="detail">the detail at which the torus is calculated / drawn</param>
-    /// <returns>a collection of vertices</returns>
-    public List<List<Vector3D>> CalculateTorus(double radius, double ringRadius, int detail, int ringDetail)
+    public List<Vector3D> CalculateTorus(double radius, double ringRadius, int detail, int ringDetail)
     {
-        Vector3D[] circle = new Vector3D[detail + 1];
+        List<Vector3D> vertices = new();
+
         var step = Helpers.AngleUtils.DegreeToRadian(360.0 / detail);     // convert from radials to degree
         double ringAngleStep = 360.0 / ringDetail;       // step size for the rings
-        List<List<Vector3D>> torus = new();
 
-        for (int i = 0; i <= detail; i++)
+
+        var ringPointStep = 360.0 / ringDetail;
+
+        for (int i = 0; i < detail; i++)
         {
-            var angle = step * i;
-            Vector3D result = new Vector3D(radius * Math.Cos(angle), Math.Sin(angle) * radius, 0);
-            result += origin;
-            circle[i] = result;
+            var point = new Vector3D(radius * (Math.Sin(step * i)), radius * Math.Cos(step * i), 0);
 
-
-            List<Vector3D> ring = new();
-            for (int j = 0; j < ringDetail; j++)
+            for (int r = 0; r < ringDetail; r++)
             {
-                double subangle = AngleUtils.DegreeToRadian(j * ringAngleStep);
-                ring.Add(CalculateVector(result, subangle, ringRadius));
+
+                var ringAngle = AngleUtils.DegreeToRadian(ringPointStep * r);
+                point.Normalize();
+                var subVector = new Vector3D(Math.Cos(ringAngle) * point.X,
+                                             Math.Cos(ringAngle) * point.Y,
+                                             Math.Sin(ringAngle));
+                subVector *= ringRadius;
+                subVector += origin + point * radius;
+
+                vertices.Add(subVector + point);
             }
-            torus.Add(ring);
         }
-        return torus;
+
+        return vertices;
     }
 
     /// <summary>
@@ -97,16 +96,15 @@ public class Torus
     {
         Vector3D vector = center;
         vector.Normalize();
-        vector.Z = vector.Z == 0 ? 1 : vector.Z;
 
         double cos = Math.Round(Math.Cos(angle), 3);
         double sin = Math.Round(Math.Sin(angle), 3);
 
         vector.X *= cos * radius;
         vector.Y *= cos * radius;
-        vector.Z *= sin * radius;
+        vector.Z = sin * radius;
 
-        return vector + center;
+        return center - vector;
     }
 
 }

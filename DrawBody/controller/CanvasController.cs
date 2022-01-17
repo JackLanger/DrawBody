@@ -1,4 +1,4 @@
-﻿using DrawBody.execution;
+using DrawBody.execution;
 using DrawBody.Helpers;
 using DrawBody.Models;
 using System;
@@ -22,7 +22,7 @@ public class CanvasController : BaseController
     /// </summary>
     private static Vector3D _origin = new Vector3D(WindowUtils.GetCenter().Item1, WindowUtils.GetCenter().Item2, 0);
 
-    private int _TorusDetail;
+    private int _TorusDetail = 50;
 
     public int TorusDetail
     {
@@ -31,11 +31,11 @@ public class CanvasController : BaseController
         {
             _TorusDetail = value;
             OnPropertyChanged();
-            updateCanvas();
+            UpdateCanvas();
         }
     }
 
-    private int _RingDetail;
+    private int _RingDetail = 25;
 
     public int RingDetail
     {
@@ -44,7 +44,7 @@ public class CanvasController : BaseController
         {
             _RingDetail = value;
             OnPropertyChanged();
-            updateCanvas();
+            UpdateCanvas();
         }
     }
 
@@ -63,7 +63,7 @@ public class CanvasController : BaseController
         }
     }
 
-    private void updateCanvas()
+    private void UpdateCanvas()
     {
         if (Canvas is null)
             return;
@@ -81,6 +81,7 @@ public class CanvasController : BaseController
     {
         _canvas = canvas;
         DrawGrid();
+        UpdateCanvas();
     }
 
     /// <summary>
@@ -89,7 +90,7 @@ public class CanvasController : BaseController
     private void DrawTorus()
     {
         Torus torus = new Torus();
-        DrawBody(torus.CalculateTorus(200, 50, TorusDetail, RingDetail));
+        DrawBody(torus.CalculateTorus(200, 50, TorusDetail, RingDetail), RingDetail);
     }
 
     /// <summary>
@@ -102,22 +103,30 @@ public class CanvasController : BaseController
         return true;
     }
 
-    private void DrawBody(List<List<Vector3D>> bodyValues)
+    private void DrawBody(List<Vector3D> bodyVals, int ringDetail)
     {
-        for (int i = 0; i < bodyValues.Count; i++)
-        {
-            var current = bodyValues[i];
-            var next = bodyValues[(i + 1) % bodyValues.Count];
-            for (var k = 0; k < current.Count; k++)
-            {
-                int indexPlus = Math.Abs((k + 1) % current.Count);
-                List<Vector3D> vector3Ds = new List<Vector3D>() { current[k], next[k], next[indexPlus],
-                                                                                                     current[k], current[indexPlus], next[indexPlus] };
+        var mod = bodyVals.Count;
 
-                DrawPolygon(CorrectValuesFor2D(vector3Ds));
-            }
+        for (int i = 0; i < bodyVals.Count; i++)
+        {
+            var ringNum = ringDetail * (i * (bodyVals.Count / ringDetail));
+
+            var first = bodyVals[i];
+            var second = bodyVals[(i + ringDetail) % mod];
+            var third = bodyVals[(i + ringNum + 1) % mod];
+            //var fourth = bodyVals[(i + 1) % ringDetail];
+
+            //  1 2 3 3 1 4
+
+            var polyOne = new List<Vector3D>() { first, second, third };
+            //var polyTwo = new List<Vector3D>() { third, first, fourth };
+
+            DrawPolygon(CorrectValuesFor2D(polyOne));
+            //DrawPolygon(CorrectValuesFor2D(polyTwo));
         }
     }
+
+
     /// <summary>
     /// Draws a single polygon
     /// </summary>
@@ -135,27 +144,6 @@ public class CanvasController : BaseController
         Canvas.Children.Add(polygon);
     }
 
-    /// <summary>
-    /// Draws a torus body on the canvas
-    /// </summary>
-    public void DrawTorusRings()
-    {
-        Torus torus = new();
-
-        List<List<Vector3D>> rings = torus.CalculateTorus();
-
-        foreach (var ring in rings)
-        {
-            if (ring == rings[0])       // dont draw the first ring
-                continue;
-
-            Polyline poly = new();
-            poly.Stroke = Brushes.Black;
-            poly.StrokeThickness = 0.36;
-            poly.Points = new PointCollection(CorrectValuesFor2D(ring));
-            Canvas.Children.Add(poly);
-        }
-    }
     /// <summary>
     /// Draws the origin on the canvas.
     /// </summary>
@@ -323,6 +311,7 @@ public class CanvasController : BaseController
             // as opposed to the system in which we calculate our values
             // therefore we need to invert the y values and subtract them
             // from the y axis in order to draw it correctly
+
 
             result[index++] = new Point(x, y);
         }
